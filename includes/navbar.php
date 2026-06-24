@@ -25,7 +25,7 @@ if ($currentUser) {
 $currentScript = $_SERVER['SCRIPT_NAME'];
 ?>
 <header class="sidebar">
-    <div class="brand-wrap" style="display:flex; align-items:center; gap:0.75rem; padding: 0.5rem 0.5rem 1.5rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem;">
+    <a href="/index.php" class="brand-wrap" style="display:flex; align-items:center; gap:0.75rem; padding: 0.5rem 0.5rem 1.5rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem; text-decoration:none; color:inherit;">
         <div style="width:40px; height:40px; border-radius:8px; background:rgba(84,233,138,0.1); border:1px solid rgba(84,233,138,0.2); display:flex; align-items:center; justify-content:center;">
             <span class="material-symbols-outlined" style="font-size:24px; color:var(--accent-primary);">hub</span>
         </div>
@@ -33,7 +33,7 @@ $currentScript = $_SERVER['SCRIPT_NAME'];
             <h1 style="font-size:1.5rem; font-weight:700; color:var(--accent-primary); margin:0; line-height:1;">Evntra</h1>
             <p style="font-size:0.6rem; color:var(--text-secondary); margin:0.25rem 0 0 0; text-transform:uppercase; letter-spacing:0.1em;">Elite Competition Hub</p>
         </div>
-    </div>
+    </a>
     <nav class="sidebar-nav">
         <?php foreach ($navLinks as $link): ?>
             <a href="<?= e($link['href']) ?>" class="nav-link <?= $currentScript === $link['href'] ? 'active' : '' ?>">

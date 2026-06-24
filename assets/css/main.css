@@ -2213,6 +2213,7 @@ body.has-top-bar {
   flex-direction: column;
   height: 100%;
   transition: var(--transition);
+  cursor: pointer;
 }
 
 .browse-card:hover {

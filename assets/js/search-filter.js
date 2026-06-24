@@ -49,7 +49,7 @@ function competitionCardTemplate(item) {
     : `${item.registered_count} Registered`;
 
   return `
-    <article class="browse-card ${item.category.toLowerCase()}">
+    <article class="browse-card ${item.category.toLowerCase()}" data-competition-link="${item.url}">
       <div class="browse-card-image-wrap">
         <img class="browse-card-image" src="${image}" alt="${item.title}">
         <div class="browse-card-badges-left">
@@ -142,6 +142,16 @@ function renderCompetitionResults(payload) {
       });
     });
   }
+
+  grid.querySelectorAll('.browse-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('button, a')) return;
+      const url = card.dataset.competitionLink;
+      if (url) {
+        window.location.href = url;
+      }
+    });
+  });
 }
 
 async function deleteCompetitionFromBrowse() {
