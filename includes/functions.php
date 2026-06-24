@@ -41,7 +41,7 @@ function app_config(): array
     return [
         'db_host' => app_env('DB_HOST', '127.0.0.1'),
         'db_port' => app_env('DB_PORT', '3306'),
-        'db_name' => app_env('DB_NAME', 'evntra'),
+        'db_name' => app_env('DB_NAME', 'envtra'),
         'db_user' => app_env('DB_USER', 'root'),
         'db_pass' => app_env('DB_PASS', ''),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
