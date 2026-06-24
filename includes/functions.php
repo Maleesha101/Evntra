@@ -391,7 +391,7 @@ function competition_within_days(DateTimeImmutable $first, DateTimeImmutable $se
 
 function run_conflict_scan(PDO $pdo): array
 {
-    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC')->fetchAll();
+    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("pending", "published", "ongoing") ORDER BY event_start ASC')->fetchAll();
     $pdo->exec('DELETE FROM conflict_flags');
     $insert = $pdo->prepare('INSERT INTO conflict_flags (competition_a_id, competition_b_id, severity) VALUES (?, ?, ?)');
     $results = [];
