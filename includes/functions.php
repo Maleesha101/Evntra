@@ -41,9 +41,9 @@ function app_config(): array
     return [
         'db_host' => app_env('DB_HOST', '127.0.0.1'),
         'db_port' => app_env('DB_PORT', '3306'),
-        'db_name' => app_env('DB_NAME', 'unicompete_hub'),
+        'db_name' => app_env('DB_NAME', 'evntra'),
         'db_user' => app_env('DB_USER', 'root'),
-        'db_pass' => app_env('DB_PASS', 'Mk17628!'),
+        'db_pass' => app_env('DB_PASS', ''),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
         'smtp_host' => app_env('SMTP_HOST', ''),
         'smtp_port' => (int) app_env('SMTP_PORT', 587),
@@ -1076,7 +1076,20 @@ function save_competition_from_input(PDO $pdo, int $organizerId, array $input, a
     $category = (string) ($input['category'] ?? 'Other');
     $description = trim((string) ($input['description'] ?? ''));
     $eligibility = trim((string) ($input['eligibility'] ?? ''));
-    $prizePool = trim((string) ($input['prize_pool'] ?? ''));
+    $firstPlacePrize = trim((string) ($input['first_place_prize'] ?? ''));
+    $secondPlacePrize = trim((string) ($input['second_place_prize'] ?? ''));
+    $thirdPlacePrize = trim((string) ($input['third_place_prize'] ?? ''));
+    // Combine prizes into prize_pool for database storage
+    $prizePool = '';
+    if ($firstPlacePrize !== '') {
+        $prizePool .= '1st: ' . $firstPlacePrize;
+    }
+    if ($secondPlacePrize !== '') {
+        $prizePool .= ($prizePool !== '' ? ' | ' : '') . '2nd: ' . $secondPlacePrize;
+    }
+    if ($thirdPlacePrize !== '') {
+        $prizePool .= ($prizePool !== '' ? ' | ' : '') . '3rd: ' . $thirdPlacePrize;
+    }
     $registrationStart = trim((string) ($input['registration_start'] ?? ''));
     $registrationEnd = trim((string) ($input['registration_end'] ?? ''));
     $eventStart = trim((string) ($input['event_start'] ?? ''));
@@ -1131,4 +1144,28 @@ function save_competition_from_input(PDO $pdo, int $organizerId, array $input, a
         'competition_id' => $competitionId,
         'slug' => $slug,
     ];
+}
+
+function parse_prize_pool(string $prizePool): array
+{
+    $prizes = ['first' => null, 'second' => null, 'third' => null];
+    
+    if (empty($prizePool)) {
+        return $prizes;
+    }
+    
+    // Split by pipe separator
+    $parts = array_map('trim', explode('|', $prizePool));
+    
+    foreach ($parts as $part) {
+        if (str_starts_with($part, '1st:')) {
+            $prizes['first'] = trim(substr($part, 4));
+        } elseif (str_starts_with($part, '2nd:')) {
+            $prizes['second'] = trim(substr($part, 4));
+        } elseif (str_starts_with($part, '3rd:')) {
+            $prizes['third'] = trim(substr($part, 4));
+        }
+    }
+    
+    return $prizes;
 }
