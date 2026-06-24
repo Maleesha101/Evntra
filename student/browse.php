@@ -12,8 +12,11 @@ $pageScripts = [
     '/assets/js/calendar.js',
 ];
 
+// Get search query from URL parameters
+$searchQuery = (string) ($_GET['search'] ?? '');
+
 $initial = competition_search_query([
-    'search' => '',
+    'search' => $searchQuery,
     'category' => '',
     'status' => 'all',
     'venue' => 'all',
@@ -48,7 +51,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
         <div class="form-group">
             <label for="search">Search</label>
-            <input id="search" type="search" placeholder="Search events, tags..." data-search-input>
+            <input id="search" type="search" placeholder="Search events, tags..." data-search-input value="<?= e($searchQuery) ?>">
         </div>
         <div class="form-group">
             <label>Category</label>

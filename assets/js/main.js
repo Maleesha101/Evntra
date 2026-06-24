@@ -65,4 +65,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-auto-submit]').forEach((field) => {
     field.addEventListener('change', () => field.form?.requestSubmit());
   });
+
+  // Handle header search bar
+  const headerSearchInput = document.querySelector('.search-input');
+  if (headerSearchInput) {
+    headerSearchInput.addEventListener('keypress', (e) => {
+      if (e.key !== 'Enter') return;
+
+      const query = headerSearchInput.value.trim();
+      if (!query) return;
+
+      const sidebarSearch = document.querySelector('[data-search-input]');
+      
+      // If on browse page, update sidebar search and trigger search
+      if (sidebarSearch) {
+        sidebarSearch.value = query;
+        if (window.searchState) {
+          window.searchState.page = 1;
+        }
+        if (window.fetchCompetitions) {
+          window.fetchCompetitions();
+        }
+        headerSearchInput.value = '';
+      } else {
+        // Otherwise, redirect to browse page with search parameter
+        window.location.href = `/student/browse.php?search=${encodeURIComponent(query)}`;
+      }
+    });
+  }
 });

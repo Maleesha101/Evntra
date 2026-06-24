@@ -33,7 +33,17 @@ function app_env(string $key, mixed $default = null): mixed
         }
     }
 
-    return $_ENV[$key] ?? $_SERVER[$key] ?? $env[$key] ?? getenv($key) ?: $default;
+    if (array_key_exists($key, $_ENV)) {
+        return $_ENV[$key];
+    }
+    if (array_key_exists($key, $_SERVER)) {
+        return $_SERVER[$key];
+    }
+    if (array_key_exists($key, $env)) {
+        return $env[$key];
+    }
+    $value = getenv($key);
+    return $value !== false ? $value : $default;
 }
 
 function app_config(): array
@@ -43,7 +53,7 @@ function app_config(): array
         'db_port' => app_env('DB_PORT', '3306'),
         'db_name' => app_env('DB_NAME', 'unicompete_hub'),
         'db_user' => app_env('DB_USER', 'root'),
-        'db_pass' => app_env('DB_PASS', 'Mk17628!'),
+        'db_pass' => app_env('DB_PASS', null),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
         'smtp_host' => app_env('SMTP_HOST', ''),
         'smtp_port' => (int) app_env('SMTP_PORT', 587),
@@ -688,8 +698,10 @@ function competition_search_query(array $filters): array
     $params = [':user_id' => (int) ($filters['user_id'] ?? 0)];
 
     if (!empty($filters['search'])) {
-        $conditions[] = '(c.title LIKE :search OR c.description LIKE :search OR c.venue LIKE :search)';
-        $params[':search'] = '%' . $filters['search'] . '%';
+        $conditions[] = '(c.title LIKE :search_title OR c.description LIKE :search_description OR c.venue LIKE :search_venue)';
+        $params[':search_title'] = '%' . $filters['search'] . '%';
+        $params[':search_description'] = '%' . $filters['search'] . '%';
+        $params[':search_venue'] = '%' . $filters['search'] . '%';
     }
 
     if (!empty($filters['category'])) {
@@ -746,13 +758,14 @@ function competition_search_query(array $filters): array
     $offset = ($page - 1) * $perPage;
 
     $countSql = 'SELECT COUNT(*) FROM competitions c INNER JOIN users u ON c.organizer_id = u.id WHERE ' . $whereSql;
-    $countParams = $params;
-    unset($countParams[':user_id']);
-    $countStmt = app_pdo()->prepare($countSql);
-    foreach ($countParams as $key => $value) {
-        $countStmt->bindValue($key, $value);
+    $countParams = [];
+    foreach ($params as $key => $value) {
+        if ($key !== ':user_id' && strpos($countSql, $key) !== false) {
+            $countParams[$key] = $value;
+        }
     }
-    $countStmt->execute();
+    $countStmt = app_pdo()->prepare($countSql);
+    $countStmt->execute($countParams);
     $total = (int) $countStmt->fetchColumn();
 
     $listSql = 'SELECT c.*, u.full_name AS organizer_name,
@@ -760,14 +773,9 @@ function competition_search_query(array $filters): array
                        (SELECT COUNT(*) FROM registrations r WHERE r.competition_id = c.id AND r.status IN ("registered", "waitlisted")) AS registered_count
                 FROM competitions c
                 INNER JOIN users u ON c.organizer_id = u.id
-                WHERE ' . $whereSql . $orderSql . ' LIMIT :limit OFFSET :offset';
+                WHERE ' . $whereSql . $orderSql . ' LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset;
     $stmt = app_pdo()->prepare($listSql);
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value);
-    }
-    $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute($params);
 
     return [
         'items' => $stmt->fetchAll(),
