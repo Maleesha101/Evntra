@@ -286,6 +286,37 @@ textarea:focus {
   background: var(--bg-surface);
 }
 
+input.field-error,
+select.field-error,
+textarea.field-error {
+  border-color: var(--accent-danger) !important;
+  background: rgba(255, 71, 87, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.1) !important;
+}
+
+input.field-error:focus,
+select.field-error:focus,
+textarea.field-error:focus {
+  border-color: var(--accent-danger) !important;
+  box-shadow: 0 0 0 3px rgba(255, 71, 87, 0.2) !important;
+}
+
+.field-error-message {
+  color: var(--accent-danger);
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.field-error-message::before {
+  content: '⚠';
+  display: inline-block;
+  font-size: 0.9rem;
+}
+
 .password-input-wrapper {
   position: relative;
   display: flex;
