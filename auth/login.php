@@ -39,10 +39,6 @@ include __DIR__ . '/../includes/header.php';
         <span class="badge" style="background:rgba(108,99,255,0.2);">Centralized competition hub</span>
         <h1>Sign in to manage every university competition in one place.</h1>
         <p>Track registrations, bookmarks, conflict warnings, and organizer analytics from a single account.</p>
-        <div class="grid grid-2" style="margin-top:1.5rem;">
-            <div class="stat-card"><strong>6</strong><p class="small-text">Seeded sample competitions</p></div>
-            <div class="stat-card"><strong>3</strong><p class="small-text">User roles supported</p></div>
-        </div>
     </div>
     <div class="form-card">
         <h2>Login</h2>
@@ -62,7 +58,6 @@ include __DIR__ . '/../includes/header.php';
             </div>
         </form>
         <p class="small-text">No account yet? <a href="/auth/register.php">Create one here</a>.</p>
-        <p class="small-text">Seed logins: student@evntra.test / Student123!, organizer@evntra.test / Organizer123!, admin@evntra.test / Admin123!</p>
     </div>
 </section>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

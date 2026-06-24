@@ -133,7 +133,7 @@ CREATE TABLE password_resets (
 INSERT INTO users (id, full_name, email, password_hash, role, university, email_verified, is_active, created_at) VALUES
 (1, 'Alya Rahman', 'student@evntra.test', '$2y$10$EJO9/Ag.gtgU.tkxGCeoGuLN7mlAm72sQxM1RRBFiQd27dSbK0JTS', 'student', 'Evntra University', 1, 1, '2026-01-05 09:00:00'),
 (2, 'Nabil Hassan', 'organizer@evntra.test', '$2y$10$MdvzuaOGi9KeD311J.JVIu10yHCdy0N5t0QaDaxVNCGwcACfHMqXW', 'organizer', 'Evntra University', 1, 1, '2026-01-05 09:05:00'),
-(3, 'Dr. Serena Cole', 'admin@evntra.test', '$2y$10$9fKdbq9r.oOc5xh/HUwwTOepU/oBM8HcFqa9NJDAYSKEcAeAUtFQ.', 'admin', 'Evntra University', 1, 1, '2026-01-05 09:10:00');
+(3, 'Maleesha Indunil', 'admin@evntra.test', '$2y$10$9fKdbq9r.oOc5xh/HUwwTOepU/oBM8HcFqa9NJDAYSKEcAeAUtFQ.', 'admin', 'Evntra University', 1, 1, '2026-01-05 09:10:00');
 
 INSERT INTO competitions (id, organizer_id, title, slug, description, category, banner_image, registration_start, registration_end, event_start, event_end, venue, max_participants, team_size_min, team_size_max, prize_pool, eligibility, status, views, created_at) VALUES
 (1, 2, 'Campus CTF 2026', 'campus-ctf-2026', 'A flagship capture-the-flag challenge focused on web, crypto, and reverse engineering.', 'CTF', NULL, '2026-05-01 08:00:00', '2026-05-20 23:59:00', '2026-05-25 09:00:00', '2026-05-25 18:00:00', 'Online', 120, 1, 4, '$2,500 cash + trophies', 'Open to all undergraduate and postgraduate students.', 'published', 95, '2026-04-18 10:00:00'),
