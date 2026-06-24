@@ -14,11 +14,11 @@ if ($currentUser) {
     } elseif ($role === 'organizer') {
         $navLinks[] = ['label' => 'Dashboard', 'href' => '/organizer/dashboard.php', 'icon' => 'space_dashboard'];
         $navLinks[] = ['label' => 'My Competitions', 'href' => '/organizer/my-competitions.php', 'icon' => 'table_chart'];
-        $navLinks[] = ['label' => 'Analytics', 'href' => '/organizer/analytics.php', 'icon' => 'leaderboard'];
     } elseif ($role === 'admin') {
         $navLinks[] = ['label' => 'Dashboard', 'href' => '/admin/dashboard.php', 'icon' => 'space_dashboard'];
         $navLinks[] = ['label' => 'Approvals', 'href' => '/admin/approve-competitions.php', 'icon' => 'rule'];
         $navLinks[] = ['label' => 'Users', 'href' => '/admin/manage-users.php', 'icon' => 'groups'];
+        $navLinks[] = ['label' => 'Analytics', 'href' => '/admin/analytics.php', 'icon' => 'leaderboard'];
     }
 }
 

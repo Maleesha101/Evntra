@@ -780,20 +780,46 @@ function competition_search_query(array $filters): array
 
 function competition_calendar_events(PDO $pdo): array
 {
-    $stmt = $pdo->query('SELECT id, title, category, event_start, event_end, slug FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC');
-    $events = [];
-    foreach ($stmt->fetchAll() as $row) {
-        $events[] = [
-            'id' => (int) $row['id'],
-            'title' => $row['title'],
-            'start' => $row['event_start'],
-            'end' => $row['event_end'],
-            'url' => competition_url($row),
-            'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
-            'extendedProps' => ['category' => $row['category']],
-        ];
+    try {
+        // Detailed query with logging
+        $query = '
+            SELECT id, title, category, event_start, event_end, slug, status
+            FROM competitions 
+            WHERE status IN ("published", "ongoing")
+            AND event_start IS NOT NULL 
+            AND event_end IS NOT NULL
+            AND event_start <= event_end
+            ORDER BY event_start ASC
+        ';
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        
+        // Log the raw results
+        error_log('Calendar Query Results: Found ' . count($rows) . ' competitions');
+        
+        $events = [];
+        foreach ($rows as $row) {
+            $event = [
+                'id' => (int) $row['id'],
+                'title' => $row['title'],
+                'start' => $row['event_start'],
+                'end' => $row['event_end'],
+                'url' => competition_url($row),
+                'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
+                'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
+            ];
+            $events[] = $event;
+            error_log('Calendar Event: ' . $row['title'] . ' (' . $row['status'] . ') - ' . $row['event_start']);
+        }
+        
+        error_log('Calendar Events Total: ' . count($events));
+        return $events;
+    } catch (Throwable $e) {
+        error_log('Calendar events error: ' . $e->getMessage());
+        return [];
     }
-    return $events;
 }
 
 function competition_registrations_for_organizer(PDO $pdo, int $organizerId): array
