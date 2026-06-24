@@ -141,7 +141,7 @@ include __DIR__ . '/../includes/header.php';
                 <div class="prize-card gold">
                     <span class="material-symbols-outlined text-warning" style="font-size: 3rem; color: var(--accent-warning); font-variation-settings: 'FILL' 1;">trophy</span>
                     <span class="prize-rank">CHAMPION</span>
-                    <span class="prize-amount"><?= e($prizes['first'] ?: 'TBA') ?></span>
+                    <span class="prize-amount"><?='Rs.' . e($prizes['first'] ?: 'TBA') ?></span>
                     <span class="prize-detail">Plus Winner Badge</span>
                 </div>
              
