@@ -64,7 +64,8 @@ if (!$isAuthPage) {
 <header class="app-header">
     <div class="search-container">
         <span class="material-symbols-outlined search-icon">search</span>
-        <input class="search-input" placeholder="Search events, teams..." type="text"/>
+        <input class="search-input" placeholder="Search events, teams..." type="text" autocomplete="off"/>
+        <div class="search-dropdown" data-search-dropdown hidden></div>
     </div>
     <div class="header-actions">
         <?php if ($currentUser): ?>

@@ -3,6 +3,10 @@ const searchState = {
   sort: 'newest',
 };
 
+const appIsAdmin = document.getElementById('browse-admin-state')?.dataset.isAdmin === '1';
+const appCsrfToken = document.getElementById('browse-admin-state')?.dataset.csrf || '';
+let currentDeleteCompetitionId = null;
+
 function competitionCardTemplate(item) {
   const status = item.max_participants && item.registered_count >= item.max_participants ? 'Full' : item.registration_status;
   
@@ -52,6 +56,11 @@ function competitionCardTemplate(item) {
           <span class="badge ${statusClass}" style="font-size: 10px; padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.25rem;">${status}</span>
           <span class="badge" style="background: rgba(17, 19, 23, 0.6); backdrop-filter: blur(8px); border: 1px solid var(--border); font-size: 10px; padding: 0.25rem 0.5rem; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 0.05em; color: var(--text-primary); display: inline-flex; align-items: center; gap: 0.25rem;">${venueType}</span>
         </div>
+        ${appIsAdmin ? `
+        <button class="browse-card-delete-btn" data-delete-competition-id="${item.id}" aria-label="Delete competition">
+          <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+        </button>
+        ` : ''}
         <button class="${bookmarkClass}" data-bookmark-toggle data-competition-id="${item.id}" aria-label="Bookmark">
           <span class="material-symbols-outlined" style="font-size: 18px;">${bookmarkIcon}</span>
         </button>
@@ -121,6 +130,38 @@ function renderCompetitionResults(payload) {
       }
     });
   });
+
+  if (appIsAdmin) {
+    grid.querySelectorAll('[data-delete-competition-id]').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        currentDeleteCompetitionId = button.getAttribute('data-delete-competition-id');
+        const modal = document.getElementById('browse-delete-modal');
+        if (modal) modal.classList.add('open');
+      });
+    });
+  }
+}
+
+async function deleteCompetitionFromBrowse() {
+  if (!currentDeleteCompetitionId) return;
+  try {
+    const response = await fetch('/api/delete-competition.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ competition_id: currentDeleteCompetitionId, csrf_token: appCsrfToken })
+    });
+    const result = await response.json();
+    if (!response.ok || result.error) {
+      throw new Error(result.error || 'Unable to delete competition.');
+    }
+    currentDeleteCompetitionId = null;
+    document.querySelector('[data-close-modal]')?.click();
+    fetchCompetitions();
+  } catch (err) {
+    alert(err.message || 'Delete failed.');
+  }
 }
 
 function renderActiveChips() {
@@ -286,6 +327,11 @@ window.addEventListener('DOMContentLoaded', () => {
       searchState.sort = 'newest';
       fetchCompetitions();
     });
+  }
+
+  const confirmDeleteBtn = document.getElementById('confirmBrowseDelete');
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', deleteCompetitionFromBrowse);
   }
 
   if (document.querySelector('[data-competition-grid]')) {

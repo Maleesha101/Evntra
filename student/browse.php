@@ -12,8 +12,11 @@ $pageScripts = [
     '/assets/js/calendar.js',
 ];
 
+// Get search query from URL parameters
+$searchQuery = (string) ($_GET['search'] ?? '');
+
 $initial = competition_search_query([
-    'search' => '',
+    'search' => $searchQuery,
     'category' => '',
     'status' => 'all',
     'venue' => 'all',
@@ -27,6 +30,7 @@ $initial = competition_search_query([
 
 include __DIR__ . '/../includes/header.php';
 ?>
+<div id="browse-admin-state" data-is-admin="<?= $currentUser && $currentUser['role'] === 'admin' ? '1' : '0' ?>" data-csrf="<?= e(csrf_token()) ?>" style="display:none;"></div>
 <section class="page-hero">
     <div class="section-head">
         <div>
@@ -48,7 +52,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
         <div class="form-group">
             <label for="search">Search</label>
-            <input id="search" type="search" placeholder="Search events, tags..." data-search-input>
+            <input id="search" type="search" placeholder="Search events, tags..." data-search-input value="<?= e($searchQuery) ?>">
         </div>
         <div class="form-group">
             <label>Category</label>
@@ -118,4 +122,20 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </section>
+
+<div id="browse-delete-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="browseDeleteTitle">
+    <div class="modal-content" style="background: var(--surface); border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.35);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div>
+                <h2 id="browseDeleteTitle" style="margin:0; font-size:1.25rem;">Delete Event?</h2>
+                <p class="small-text" style="margin:0.35rem 0 0;">This will permanently remove the event from the platform.</p>
+            </div>
+            <button type="button" data-close-modal class="btn btn-icon" style="background:transparent; border:none; color:var(--text-secondary); font-size:1.4rem;">×</button>
+        </div>
+        <div style="display:flex; gap:0.75rem; justify-content:flex-end; margin-top:1rem;">
+            <button type="button" data-close-modal class="btn btn-outline">Cancel</button>
+            <button type="button" id="confirmBrowseDelete" class="btn btn-danger">Yes, delete</button>
+        </div>
+    </div>
+</div>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

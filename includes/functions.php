@@ -33,7 +33,17 @@ function app_env(string $key, mixed $default = null): mixed
         }
     }
 
-    return $_ENV[$key] ?? $_SERVER[$key] ?? $env[$key] ?? getenv($key) ?: $default;
+    if (array_key_exists($key, $_ENV)) {
+        return $_ENV[$key];
+    }
+    if (array_key_exists($key, $_SERVER)) {
+        return $_SERVER[$key];
+    }
+    if (array_key_exists($key, $env)) {
+        return $env[$key];
+    }
+    $value = getenv($key);
+    return $value !== false ? $value : $default;
 }
 
 function app_config(): array
@@ -41,7 +51,7 @@ function app_config(): array
     return [
         'db_host' => app_env('DB_HOST', '127.0.0.1'),
         'db_port' => app_env('DB_PORT', '3306'),
-        'db_name' => app_env('DB_NAME', 'evntra'),
+        'db_name' => app_env('DB_NAME', 'envtra'),
         'db_user' => app_env('DB_USER', 'root'),
         'db_pass' => app_env('DB_PASS', ''),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
@@ -257,7 +267,17 @@ function competition_url(array $competition): string
 function competition_registration_open(array $competition): bool
 {
     $now = new DateTimeImmutable('now');
-    return $now >= new DateTimeImmutable($competition['registration_start']) && $now <= new DateTimeImmutable($competition['registration_end']);
+    $regStart = new DateTimeImmutable($competition['registration_start']);
+    $regEnd = new DateTimeImmutable($competition['registration_end']);
+    $eventStart = new DateTimeImmutable($competition['event_start']);
+    
+    // Allow registration if:
+    // 1. Current time is within the official registration window, OR
+    // 2. Event hasn't started yet (even if registration_end has passed)
+    $withinWindow = $now >= $regStart && $now <= $regEnd;
+    $beforeEventStart = $now < $eventStart;
+    
+    return $withinWindow || $beforeEventStart;
 }
 
 function competition_is_full(PDO $pdo, int $competitionId): bool
@@ -391,7 +411,7 @@ function competition_within_days(DateTimeImmutable $first, DateTimeImmutable $se
 
 function run_conflict_scan(PDO $pdo): array
 {
-    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC')->fetchAll();
+    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("pending", "published", "ongoing") ORDER BY event_start ASC')->fetchAll();
     $pdo->exec('DELETE FROM conflict_flags');
     $insert = $pdo->prepare('INSERT INTO conflict_flags (competition_a_id, competition_b_id, severity) VALUES (?, ?, ?)');
     $results = [];
@@ -710,8 +730,10 @@ function competition_search_query(array $filters): array
     $params = [':user_id' => (int) ($filters['user_id'] ?? 0)];
 
     if (!empty($filters['search'])) {
-        $conditions[] = '(c.title LIKE :search OR c.description LIKE :search OR c.venue LIKE :search)';
-        $params[':search'] = '%' . $filters['search'] . '%';
+        $conditions[] = '(c.title LIKE :search_title OR c.description LIKE :search_description OR c.venue LIKE :search_venue)';
+        $params[':search_title'] = '%' . $filters['search'] . '%';
+        $params[':search_description'] = '%' . $filters['search'] . '%';
+        $params[':search_venue'] = '%' . $filters['search'] . '%';
     }
 
     if (!empty($filters['category'])) {
@@ -768,13 +790,14 @@ function competition_search_query(array $filters): array
     $offset = ($page - 1) * $perPage;
 
     $countSql = 'SELECT COUNT(*) FROM competitions c INNER JOIN users u ON c.organizer_id = u.id WHERE ' . $whereSql;
-    $countParams = $params;
-    unset($countParams[':user_id']);
-    $countStmt = app_pdo()->prepare($countSql);
-    foreach ($countParams as $key => $value) {
-        $countStmt->bindValue($key, $value);
+    $countParams = [];
+    foreach ($params as $key => $value) {
+        if ($key !== ':user_id' && strpos($countSql, $key) !== false) {
+            $countParams[$key] = $value;
+        }
     }
-    $countStmt->execute();
+    $countStmt = app_pdo()->prepare($countSql);
+    $countStmt->execute($countParams);
     $total = (int) $countStmt->fetchColumn();
 
     $listSql = 'SELECT c.*, u.full_name AS organizer_name,
@@ -782,14 +805,9 @@ function competition_search_query(array $filters): array
                        (SELECT COUNT(*) FROM registrations r WHERE r.competition_id = c.id AND r.status IN ("registered", "waitlisted")) AS registered_count
                 FROM competitions c
                 INNER JOIN users u ON c.organizer_id = u.id
-                WHERE ' . $whereSql . $orderSql . ' LIMIT :limit OFFSET :offset';
+                WHERE ' . $whereSql . $orderSql . ' LIMIT ' . (int) $perPage . ' OFFSET ' . (int) $offset;
     $stmt = app_pdo()->prepare($listSql);
-    foreach ($params as $key => $value) {
-        $stmt->bindValue($key, $value);
-    }
-    $stmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-    $stmt->execute();
+    $stmt->execute($params);
 
     return [
         'items' => $stmt->fetchAll(),
@@ -802,20 +820,46 @@ function competition_search_query(array $filters): array
 
 function competition_calendar_events(PDO $pdo): array
 {
-    $stmt = $pdo->query('SELECT id, title, category, event_start, event_end, slug FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC');
-    $events = [];
-    foreach ($stmt->fetchAll() as $row) {
-        $events[] = [
-            'id' => (int) $row['id'],
-            'title' => $row['title'],
-            'start' => $row['event_start'],
-            'end' => $row['event_end'],
-            'url' => competition_url($row),
-            'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
-            'extendedProps' => ['category' => $row['category']],
-        ];
+    try {
+        // Detailed query with logging
+        $query = '
+            SELECT id, title, category, event_start, event_end, slug, status
+            FROM competitions 
+            WHERE status IN ("published", "ongoing")
+            AND event_start IS NOT NULL 
+            AND event_end IS NOT NULL
+            AND event_start <= event_end
+            ORDER BY event_start ASC
+        ';
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        
+        // Log the raw results
+        error_log('Calendar Query Results: Found ' . count($rows) . ' competitions');
+        
+        $events = [];
+        foreach ($rows as $row) {
+            $event = [
+                'id' => (int) $row['id'],
+                'title' => $row['title'],
+                'start' => $row['event_start'],
+                'end' => $row['event_end'],
+                'url' => competition_url($row),
+                'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
+                'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
+            ];
+            $events[] = $event;
+            error_log('Calendar Event: ' . $row['title'] . ' (' . $row['status'] . ') - ' . $row['event_start']);
+        }
+        
+        error_log('Calendar Events Total: ' . count($events));
+        return $events;
+    } catch (Throwable $e) {
+        error_log('Calendar events error: ' . $e->getMessage());
+        return [];
     }
-    return $events;
 }
 
 function competition_registrations_for_organizer(PDO $pdo, int $organizerId): array
