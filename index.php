@@ -21,9 +21,9 @@ include __DIR__ . '/includes/header.php';
 <!-- Welcome Hero Sectio -->
 <section class="relative-hero-panel" style="position:relative; padding: 2.5rem 0 3.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); overflow:hidden; margin-bottom:2.5rem;">
     <div class="absolute-glow" style="position:absolute; top:0; right:0; width:350px; height:350px; background:rgba(84,233,138,0.04); border-radius:50%; filter:blur(90px); pointer-events:none;"></div>
-    <!-- Evntra Logo -->
+    <!-- Evntra Hero Icon -->
     <div class="hero-logo-container">
-        <img src="/assets/img/logo.svg" alt="Evntra" class="hero-logo">
+        <span class="material-symbols-outlined hero-logo-icon">emoji_events</span>
     </div>
     <div style="position:relative; z-index:1;">
         <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.4rem 0.9rem; border-radius:999px; background:rgba(84,233,138,0.08); border:1px solid rgba(84,233,138,0.15); color:var(--accent-primary); font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1.5rem;">
