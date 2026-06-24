@@ -7,6 +7,25 @@ $pdo = require __DIR__ . '/../config/db.php';
 $currentUser = current_user();
 $slug = (string) ($_GET['slug'] ?? '');
 $competitionId = (int) ($_GET['id'] ?? 0);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_competition') {
+    require_login(['admin']);
+    verify_csrf();
+
+    $deleteCompetitionId = (int) ($_POST['competition_id'] ?? 0);
+    $competitionToDelete = get_competition_by_id($pdo, $deleteCompetitionId);
+
+    if ($competitionToDelete) {
+        $deleteStmt = $pdo->prepare('DELETE FROM competitions WHERE id = ?');
+        $deleteStmt->execute([$deleteCompetitionId]);
+        flash('success', 'Competition deleted successfully.');
+        redirect('/admin/dashboard.php');
+    }
+
+    flash('error', 'Competition not found.');
+    redirect('/admin/dashboard.php');
+}
+
 $competition = $slug !== '' ? get_competition_by_slug($pdo, $slug) : get_competition_by_id($pdo, $competitionId);
 if (!$competition) {
     http_response_code(404);
@@ -240,6 +259,31 @@ include __DIR__ . '/../includes/header.php';
                 <button class="btn btn-outline" style="width:100%;" type="button" data-copy-link="<?= e(app_config()['app_url'] . competition_url($competition)) ?>">
                     <span class="material-symbols-outlined" style="font-size:18px;">share</span> Share Event
                 </button>
+                <?php if ($currentUser && $currentUser['role'] === 'admin'): ?>
+                    <form id="deleteCompetitionForm" method="post" style="margin-top: 0.5rem;">
+                        <?= csrf_field() ?>
+                        <input type="hidden" name="competition_id" value="<?= (int) $competition['id'] ?>">
+                        <button class="btn btn-danger" type="button" data-open-modal="#delete-confirmation-modal">
+                            <span class="material-symbols-outlined">delete</span> Delete Event
+                        </button>
+                    </form>
+
+                    <div id="delete-confirmation-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+                        <div class="modal-content" style="background: var(--surface); border-radius: 1rem; box-shadow: 0 20px 60px rgba(0,0,0,0.35);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                                <div>
+                                    <h2 id="deleteModalTitle" style="margin:0; font-size:1.25rem;">Confirm Delete</h2>
+                                    <p class="small-text" style="margin:0.35rem 0 0;">This action cannot be undone. Deleting the event will remove it from the platform.</p>
+                                </div>
+                                <button type="button" data-close-modal class="btn btn-icon" style="background:transparent; border:none; color:var(--text-secondary); font-size:1.4rem;">×</button>
+                            </div>
+                            <div style="margin-top:1rem; display:flex; gap:0.75rem; justify-content:flex-end;">
+                                <button type="button" data-close-modal class="btn btn-outline">Cancel</button>
+                                <button type="button" class="btn btn-danger" onclick="document.getElementById('deleteCompetitionForm').requestSubmit();">Yes, delete</button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
             
             <p class="small-text" style="text-align:center; margin-top:0.75rem;"><?= $isFull ? 'This competition is full.' : ($registrationOpen ? 'Open for registration.' : 'Registration is closed.') ?></p>

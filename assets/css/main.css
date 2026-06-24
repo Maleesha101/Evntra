@@ -2061,6 +2061,29 @@ body.has-top-bar {
   padding: 0;
 }
 
+.browse-card-delete-btn {
+  position: absolute;
+  top: 1rem;
+  right: 3.75rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 62, 62, 0.12);
+  border: 1px solid rgba(255, 62, 62, 0.2);
+  color: #ff6b6b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 5;
+  padding: 0;
+}
+
+.browse-card-delete-btn:hover {
+  background: rgba(255, 62, 62, 0.18);
+}
+
 .bookmark-badge-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
