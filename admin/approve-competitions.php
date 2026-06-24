@@ -17,11 +17,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $competition = $stmt->fetch();
     if ($competition) {
         $newStatus = $action === 'approve' ? 'published' : 'cancelled';
-        $pdo->prepare('UPDATE competitions SET status = ? WHERE id = ?')->execute([$newStatus, $competitionId]);
-        run_conflict_scan($pdo);
-        create_notification($pdo, (int) $competition['organizer_id'], 'Your competition "' . $competition['title'] . '" has been ' . ($action === 'approve' ? 'approved' : 'rejected') . '.', competition_url($competition));
-        send_approval_mail(['full_name' => $competition['organizer_name'], 'email' => $competition['organizer_email']], $competition, $action === 'approve');
-        flash('success', 'Competition ' . ($action === 'approve' ? 'approved' : 'rejected') . '.');
+        $updateStmt = $pdo->prepare('UPDATE competitions SET status = ? WHERE id = ?');
+        $result = $updateStmt->execute([$newStatus, $competitionId]);
+        
+        if ($result) {
+            // Verify the update worked
+            $verifyStmt = $pdo->prepare('SELECT status FROM competitions WHERE id = ? LIMIT 1');
+            $verifyStmt->execute([$competitionId]);
+            $updatedCompetition = $verifyStmt->fetch();
+            
+            if ($updatedCompetition && $updatedCompetition['status'] === $newStatus) {
+                // Clear any OPcache if enabled
+                if (function_exists('opcache_reset')) {
+                    @opcache_reset();
+                }
+                run_conflict_scan($pdo);
+                create_notification($pdo, (int) $competition['organizer_id'], 'Your competition "' . $competition['title'] . '" has been ' . ($action === 'approve' ? 'approved' : 'rejected') . '.', competition_url($competition));
+                send_approval_mail(['full_name' => $competition['organizer_name'], 'email' => $competition['organizer_email']], $competition, $action === 'approve');
+                flash('success', 'Competition ' . ($action === 'approve' ? 'approved' : 'rejected') . '. It will appear in the calendar within 10 seconds.');
+            } else {
+                flash('error', 'Competition status update verification failed. Current status: ' . ($updatedCompetition['status'] ?? 'unknown') . '. Please refresh and try again.');
+            }
+        } else {
+            flash('error', 'Failed to update competition status. Please try again.');
+        }
+    } else {
+        flash('error', 'Competition not found.');
     }
 }
 

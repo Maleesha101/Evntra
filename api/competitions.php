@@ -6,6 +6,10 @@ require_once __DIR__ . '/../includes/auth-guard.php';
 $pdo = require __DIR__ . '/../config/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
+// Disable all caching
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 if (($_GET['format'] ?? '') === 'calendar') {
     echo json_encode(competition_calendar_events($pdo), JSON_UNESCAPED_SLASHES);

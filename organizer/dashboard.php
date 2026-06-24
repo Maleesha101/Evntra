@@ -7,10 +7,9 @@ require_login(['organizer']);
 $pdo = require __DIR__ . '/../config/db.php';
 $currentUser = current_user();
 $pageTitle = 'Organizer Dashboard | Evntra';
-$pageScripts = ['https://cdn.jsdelivr.net/npm/chart.js'];
+$pageScripts = [];
 $stats = dashboard_stats_for_organizer($pdo, (int) $currentUser['id']);
 $recent = recent_registrations($pdo, (int) $currentUser['id'], 6);
-$chartData = organizer_chart_data($pdo, (int) $currentUser['id']);
 
 include __DIR__ . '/../includes/header.php';
 ?>
@@ -55,10 +54,6 @@ include __DIR__ . '/../includes/header.php';
 </section>
 
 <section class="dashboard-grid" style="margin-top:1.5rem;">
-    <div class="panel chart-card">
-        <div class="section-head"><h2>Registrations per competition</h2></div>
-        <div class="chart-wrap"><canvas id="organizerBarChart"></canvas></div>
-    </div>
     <div class="panel">
         <h2>Recent registrations</h2>
         <div class="table-responsive">
@@ -78,52 +73,4 @@ include __DIR__ . '/../includes/header.php';
         </div>
     </div>
 </section>
-
-<script>
-    window.addEventListener('DOMContentLoaded', () => {
-        const organizerChartData = <?= json_encode($chartData, JSON_UNESCAPED_SLASHES) ?>;
-        new Chart(document.getElementById('organizerBarChart'), {
-            type: 'bar',
-            data: {
-                labels: organizerChartData.bar.labels,
-                datasets: [{
-                    label: 'Registrations',
-                    data: organizerChartData.bar.values,
-                    backgroundColor: 'rgba(84, 233, 138, 0.75)',
-                    borderColor: '#54e98a',
-                    borderWidth: 1,
-                    borderRadius: 8,
-                }],
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1e2024',
-                        titleColor: '#e2e2e8',
-                        bodyColor: '#e2e2e8',
-                        borderColor: 'rgba(84, 233, 138, 0.25)',
-                        borderWidth: 1,
-                        displayColors: false,
-                        padding: 10,
-                        bodyFont: { family: 'Hanken Grotesk' },
-                        titleFont: { family: 'Space Grotesk' }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#bbcbbb', font: { family: 'Hanken Grotesk' } }
-                    },
-                    y: {
-                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#bbcbbb', font: { family: 'Hanken Grotesk', precision: 0 } }
-                    },
-                },
-            },
-        });
-    });
-</script>
 <?php include __DIR__ . '/../includes/footer.php'; ?>
