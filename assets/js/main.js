@@ -1,4 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Password toggle functionality
+  document.querySelectorAll('[data-toggle-password]').forEach((button) => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
+      const input = button.closest('.password-input-wrapper').querySelector('input[type="password"], input[type="text"]');
+      const eyeIcon = button.querySelector('.eye-icon');
+      const eyeOffIcon = button.querySelector('.eye-off-icon');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        eyeIcon.classList.add('hidden');
+        eyeOffIcon.classList.remove('hidden');
+      } else {
+        input.type = 'password';
+        eyeIcon.classList.remove('hidden');
+        eyeOffIcon.classList.add('hidden');
+      }
+    });
+  });
+
   const toggle = document.querySelector('[data-notification-toggle]');
   const panel = document.querySelector('[data-notification-panel]');
   const markAllRead = document.querySelector('[data-mark-all-read]');
