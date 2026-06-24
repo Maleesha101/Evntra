@@ -24,6 +24,9 @@ $relatedCompetitions = $relatedStmt->fetchAll();
 $registrationOpen = competition_registration_open($competition);
 $isFull = $maxParticipants > 0 && $registeredCount >= $maxParticipants;
 
+// Parse prize pool into individual prizes
+$prizes = parse_prize_pool((string) $competition['prize_pool']);
+
 $isRegistered = false;
 if ($currentUser) {
     $stmt = $pdo->prepare('SELECT 1 FROM registrations WHERE competition_id = ? AND user_id = ? AND status <> "cancelled" LIMIT 1');
@@ -97,21 +100,32 @@ include __DIR__ . '/../includes/header.php';
                 <div class="prize-card silver">
                     <span class="material-symbols-outlined text-secondary" style="font-size: 2.25rem;">military_tech</span>
                     <span class="prize-rank">2ND PLACE</span>
-                    <span class="prize-amount">TBA</span>
+                    <span class="prize-amount"><?= 'Rs.' . e($prizes['second'] ?: 'TBA') ?></span>
                 </div>
                 <!-- 1st Place (Gold, Champion) -->
                 <div class="prize-card gold">
                     <span class="material-symbols-outlined text-warning" style="font-size: 3rem; color: var(--accent-warning); font-variation-settings: 'FILL' 1;">trophy</span>
                     <span class="prize-rank">CHAMPION</span>
-                    <span class="prize-amount"><?= e($competition['prize_pool'] ?: 'TBA') ?></span>
+                    <span class="prize-amount"><?='Rs.' . e($prizes['first'] ?: 'TBA') ?></span>
                     <span class="prize-detail">Plus Winner Badge</span>
                 </div>
                 <!-- 3rd Place -->
                 <div class="prize-card bronze">
                     <span class="material-symbols-outlined" style="font-size: 2.25rem; color:#cd7f32;">military_tech</span>
                     <span class="prize-rank">3RD PLACE</span>
-                    <span class="prize-amount">TBA</span>
+                    <span class="prize-amount"><?= 'Rs.' . e($prizes['third'] ?: 'TBA') ?></span>
                 </div>
+            </div>
+        </div>
+                </div>
+                <!-- 1st Place (Gold, Champion) -->
+                <div class="prize-card gold">
+                    <span class="material-symbols-outlined text-warning" style="font-size: 3rem; color: var(--accent-warning); font-variation-settings: 'FILL' 1;">trophy</span>
+                    <span class="prize-rank">CHAMPION</span>
+                    <span class="prize-amount"><?= e($prizes['first'] ?: 'TBA') ?></span>
+                    <span class="prize-detail">Plus Winner Badge</span>
+                </div>
+             
             </div>
         </div>
 

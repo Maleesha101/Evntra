@@ -32,6 +32,7 @@ include __DIR__ . '/../includes/header.php';
         <h2>Quick actions</h2>
         <div class="button-row">
             <a class="btn btn-primary" href="/admin/approve-competitions.php">Approve competitions</a>
+            <a class="btn btn-outline" href="/admin/analytics.php">View Analytics</a>
             <a class="btn btn-outline" href="/admin/manage-users.php">Manage users</a>
             <a class="btn btn-outline" href="/admin/conflict-report.php">View conflicts</a>
         </div>

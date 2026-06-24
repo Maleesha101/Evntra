@@ -267,7 +267,17 @@ function competition_url(array $competition): string
 function competition_registration_open(array $competition): bool
 {
     $now = new DateTimeImmutable('now');
-    return $now >= new DateTimeImmutable($competition['registration_start']) && $now <= new DateTimeImmutable($competition['registration_end']);
+    $regStart = new DateTimeImmutable($competition['registration_start']);
+    $regEnd = new DateTimeImmutable($competition['registration_end']);
+    $eventStart = new DateTimeImmutable($competition['event_start']);
+    
+    // Allow registration if:
+    // 1. Current time is within the official registration window, OR
+    // 2. Event hasn't started yet (even if registration_end has passed)
+    $withinWindow = $now >= $regStart && $now <= $regEnd;
+    $beforeEventStart = $now < $eventStart;
+    
+    return $withinWindow || $beforeEventStart;
 }
 
 function competition_is_full(PDO $pdo, int $competitionId): bool

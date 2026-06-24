@@ -34,7 +34,7 @@ $candidate = [
     'event_end' => $eventEnd,
 ];
 
-$stmt = $pdo->prepare('SELECT * FROM competitions WHERE status IN ("published", "ongoing") AND id <> ?');
+$stmt = $pdo->prepare('SELECT * FROM competitions WHERE status IN ("pending", "published", "ongoing") AND id <> ?');
 $stmt->execute([$competitionId]);
 $published = $stmt->fetchAll();
 $conflicts = [];

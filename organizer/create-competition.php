@@ -60,9 +60,19 @@ include __DIR__ . '/../includes/header.php';
             <label for="eligibility">Eligibility</label>
             <textarea id="eligibility" name="eligibility"></textarea>
         </div>
-        <div class="form-group">
-            <label for="prize_pool">Prize pool</label>
-            <input type="text" id="prize_pool" name="prize_pool">
+        <div class="grid grid-3">
+            <div class="form-group">
+                <label for="first_place_prize">First Place Prize</label>
+                <input type="text" id="first_place_prize" name="first_place_prize" placeholder="e.g., Rs.500">
+            </div>
+            <div class="form-group">
+                <label for="second_place_prize">Second Place Prize</label>
+                <input type="text" id="second_place_prize" name="second_place_prize" placeholder="e.g., Rs.300">
+            </div>
+            <div class="form-group">
+                <label for="third_place_prize">Third Place Prize</label>
+                <input type="text" id="third_place_prize" name="third_place_prize" placeholder="e.g., Rs.100">
+            </div>
         </div>
         <div class="form-actions"><button type="button" class="btn btn-primary" data-next-step>Next</button></div>
     </section>
