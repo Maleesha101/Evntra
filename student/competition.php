@@ -263,7 +263,7 @@ include __DIR__ . '/../includes/header.php';
                     <form id="deleteCompetitionForm" method="post" style="margin-top: 0.5rem;">
                         <?= csrf_field() ?>
                         <input type="hidden" name="competition_id" value="<?= (int) $competition['id'] ?>">
-                        <button class="btn btn-danger" type="button" data-open-modal="#delete-confirmation-modal">
+                        <button class="btn btn-danger" style="width:100%;" type="button" data-open-modal="#delete-confirmation-modal">
                             <span class="material-symbols-outlined">delete</span> Delete Event
                         </button>
                     </form>
