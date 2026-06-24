@@ -18,7 +18,7 @@ $stats = [
 
 include __DIR__ . '/includes/header.php';
 ?>
-<!-- Welcome Hero Section -->
+<!-- Welcome Hero Sectio -->
 <section class="relative-hero-panel" style="position:relative; padding: 2.5rem 0 3.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); overflow:hidden; margin-bottom:2.5rem;">
     <div class="absolute-glow" style="position:absolute; top:0; right:0; width:350px; height:350px; background:rgba(84,233,138,0.04); border-radius:50%; filter:blur(90px); pointer-events:none;"></div>
     <!-- Premium Interactive Hero Orbit Animation -->
