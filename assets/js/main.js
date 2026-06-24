@@ -88,7 +88,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle header search bar
   const headerSearchInput = document.querySelector('.search-input');
+  const headerSearchDropdown = document.querySelector('[data-search-dropdown]');
+
   if (headerSearchInput) {
+    let searchTimer;
+
+    const closeHeaderDropdown = () => {
+      if (!headerSearchDropdown) return;
+      headerSearchDropdown.hidden = true;
+    };
+
+    const renderHeaderSearchResults = (results) => {
+      if (!headerSearchDropdown) return;
+      if (!results || results.length === 0) {
+        headerSearchDropdown.innerHTML = '<div class="search-dropdown-empty">No matches found.</div>';
+        headerSearchDropdown.hidden = false;
+        return;
+      }
+
+      headerSearchDropdown.innerHTML = results.map((item) => `
+        <a href="${item.url}" class="search-dropdown-item">
+          <div>
+            <div class="search-dropdown-item-title">${item.title}</div>
+            <div class="search-dropdown-item-meta"><span class="material-symbols-outlined" style="font-size:16px;">${item.category === 'Online' ? 'public' : 'location_on'}</span>${item.category}</div>
+          </div>
+          <span class="material-symbols-outlined" style="font-size:20px; color: var(--text-secondary);">arrow_forward</span>
+        </a>
+      `).join('');
+      headerSearchDropdown.hidden = false;
+    };
+
+    const fetchHeaderSearch = async (query) => {
+      if (!query || query.length < 1) {
+        closeHeaderDropdown();
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({ search: query, page: '1', per_page: '3' });
+        const response = await fetch(`/api/competitions.php?${params.toString()}`);
+        const payload = await response.json();
+        renderHeaderSearchResults(payload.items || []);
+      } catch (err) {
+        headerSearchDropdown.innerHTML = '<div class="search-dropdown-empty">Search failed. Please try again.</div>';
+        headerSearchDropdown.hidden = false;
+      }
+    };
+
+    headerSearchInput.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = window.setTimeout(() => {
+        fetchHeaderSearch(headerSearchInput.value.trim());
+      }, 250);
+    });
+
+    headerSearchInput.addEventListener('focus', () => {
+      if (headerSearchInput.value.trim()) {
+        fetchHeaderSearch(headerSearchInput.value.trim());
+      }
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('.search-container')) {
+        closeHeaderDropdown();
+      }
+    });
+
     headerSearchInput.addEventListener('keypress', (e) => {
       if (e.key !== 'Enter') return;
 
@@ -107,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
           window.fetchCompetitions();
         }
         headerSearchInput.value = '';
+        closeHeaderDropdown();
       } else {
         // Otherwise, redirect to browse page with search parameter
         window.location.href = `/student/browse.php?search=${encodeURIComponent(query)}`;

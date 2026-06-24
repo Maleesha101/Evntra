@@ -1843,6 +1843,59 @@ tr:last-child td {
   max-width: 400px;
 }
 
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  z-index: 50;
+  overflow: hidden;
+  min-height: 3rem;
+}
+
+.search-dropdown.hidden,
+.search-dropdown[hidden] {
+  display: none;
+}
+
+.search-dropdown-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.search-dropdown-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.search-dropdown-item-title {
+  font-weight: 700;
+  font-size: 0.96rem;
+}
+
+.search-dropdown-item-meta {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.search-dropdown-empty {
+  padding: 1rem;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
 .search-icon {
   position: absolute;
   left: 0.85rem;
@@ -2059,6 +2112,29 @@ body.has-top-bar {
   transition: var(--transition);
   z-index: 5;
   padding: 0;
+}
+
+.browse-card-delete-btn {
+  position: absolute;
+  top: 1rem;
+  right: 3.75rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 62, 62, 0.12);
+  border: 1px solid rgba(255, 62, 62, 0.2);
+  color: #ff6b6b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  z-index: 5;
+  padding: 0;
+}
+
+.browse-card-delete-btn:hover {
+  background: rgba(255, 62, 62, 0.18);
 }
 
 .bookmark-badge-btn:hover {
