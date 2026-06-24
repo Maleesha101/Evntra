@@ -100,20 +100,20 @@ include __DIR__ . '/../includes/header.php';
                 <div class="prize-card silver">
                     <span class="material-symbols-outlined text-secondary" style="font-size: 2.25rem;">military_tech</span>
                     <span class="prize-rank">2ND PLACE</span>
-                    <span class="prize-amount"><?= e($prizes['second'] ?: 'TBA') ?></span>
+                    <span class="prize-amount"><?= 'Rs.' . e($prizes['second'] ?: 'TBA') ?></span>
                 </div>
                 <!-- 1st Place (Gold, Champion) -->
                 <div class="prize-card gold">
                     <span class="material-symbols-outlined text-warning" style="font-size: 3rem; color: var(--accent-warning); font-variation-settings: 'FILL' 1;">trophy</span>
                     <span class="prize-rank">CHAMPION</span>
-                    <span class="prize-amount"><?= e($prizes['first'] ?: 'TBA') ?></span>
+                    <span class="prize-amount"><?='Rs.' . e($prizes['first'] ?: 'TBA') ?></span>
                     <span class="prize-detail">Plus Winner Badge</span>
                 </div>
                 <!-- 3rd Place -->
                 <div class="prize-card bronze">
                     <span class="material-symbols-outlined" style="font-size: 2.25rem; color:#cd7f32;">military_tech</span>
                     <span class="prize-rank">3RD PLACE</span>
-                    <span class="prize-amount"><?= e($prizes['third'] ?: 'TBA') ?></span>
+                    <span class="prize-amount"><?= 'Rs.' . e($prizes['third'] ?: 'TBA') ?></span>
                 </div>
             </div>
         </div>
