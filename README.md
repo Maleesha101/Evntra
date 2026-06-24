@@ -26,7 +26,7 @@ The application is built with PHP 8.1+, MySQL 8.0+, vanilla JavaScript, and cust
 ```env
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_NAME=unicompete_hub
+DB_NAME=evntra
 DB_USER=root
 DB_PASS=
 APP_URL=http://localhost/evntra
