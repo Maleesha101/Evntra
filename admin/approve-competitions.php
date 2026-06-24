@@ -42,7 +42,7 @@ include __DIR__ . '/../includes/header.php';
                     <tr>
                         <td><?= e($competition['title']) ?></td>
                         <td><?= e($competition['organizer_name']) ?></td>
-                        <td><?= e($competition['category']) ?></td>
+                        <td><span class="badge" <?= category_badge_style($competition['category']) ?>><?= e($competition['category']) ?></span></td>
                         <td><?= e($competition['event_start']) ?> to <?= e($competition['event_end']) ?></td>
                         <td>
                             <form method="post" class="button-row">

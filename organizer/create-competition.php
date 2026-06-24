@@ -90,7 +90,7 @@ include __DIR__ . '/../includes/header.php';
             <label for="venue">Venue</label>
             <input type="text" id="venue" name="venue" placeholder="Online or physical address" required>
         </div>
-        <div class="form-group" data-conflict-warning></div>
+        <div data-conflict-warning></div>
         <div class="form-actions"><button type="button" class="btn btn-outline" data-back-step>Back</button><button type="button" class="btn btn-primary" data-next-step>Next</button></div>
     </section>
 

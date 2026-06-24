@@ -7,6 +7,8 @@ require_guest();
 $pdo = require __DIR__ . '/../config/db.php';
 $pageTitle = 'Login | Evntra';
 
+$email = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
@@ -41,20 +43,21 @@ include __DIR__ . '/../includes/header.php';
         <p>Track registrations, bookmarks, conflict warnings, and organizer analytics from a single account.</p>
     </div>
     <div class="form-card">
-        <h2>Login</h2>
+        <h2>Welcome back</h2>
+        <p class="auth-subtitle">Enter your credentials to access your dashboard.</p>
         <form method="post" class="multi-step">
             <?= csrf_field() ?>
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required autocomplete="email">
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" required autocomplete="email" placeholder="Ex: you@university.edu" value="<?= htmlspecialchars($email) ?>">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required autocomplete="current-password" minlength="8">
+                <input type="password" id="password" name="password" required autocomplete="current-password" minlength="8" placeholder="••••••••">
             </div>
-            <div class="form-actions">
-                <button class="btn btn-primary" type="submit">Login</button>
-                <a class="btn btn-outline" href="/auth/forgot-password.php">Forgot password?</a>
+            <div class="form-actions" style="flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
+                <button class="btn btn-primary" type="submit">Sign in</button>
+                <a class="btn btn-outline" href="/auth/forgot-password.php" style="width:100%; text-align:center;">Forgot password?</a>
             </div>
         </form>
         <p class="small-text">No account yet? <a href="/auth/register.php">Create one here</a>.</p>

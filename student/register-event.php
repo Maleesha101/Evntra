@@ -53,7 +53,10 @@ include __DIR__ . '/../includes/header.php';
                     <input type="text" id="invite_code" name="invite_code" placeholder="Invite code from captain">
                 </div>
             </div>
-            <label class="small-text"><input type="checkbox" name="waitlist" value="1"> Add me to the waitlist if the event is full</label>
+            <label class="small-text" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-top: 0.5rem;">
+                <input type="checkbox" name="waitlist" value="1" style="width: 1.15rem; height: 1.15rem; margin: 0; cursor: pointer;">
+                Add me to the waitlist if the event is full
+            </label>
         <?php else: ?>
             <p>This is a solo event. Click register to join immediately.</p>
         <?php endif; ?>

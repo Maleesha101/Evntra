@@ -13,7 +13,6 @@
   min-height: 280px;
 }
 
-.auth-layout,
 .two-column-layout {
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
@@ -78,7 +77,6 @@
 
 @media (max-width: 1100px) {
   .dashboard-grid,
-  .auth-layout,
   .two-column-layout,
   .filter-layout {
     grid-template-columns: 1fr;

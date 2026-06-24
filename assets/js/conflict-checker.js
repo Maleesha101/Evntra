@@ -18,8 +18,18 @@ window.addEventListener('DOMContentLoaded', () => {
     const response = await fetch(`/api/check-conflict.php?${params.toString()}`);
     const payload = await response.json();
     if (payload.conflicts?.length) {
-      warningBox.innerHTML = `<strong>Conflict warning:</strong> ${payload.message}`;
-      warningBox.classList.add('flash', 'error');
+      warningBox.innerHTML = `
+        <div class="conflict-card-inner">
+          <div class="conflict-icon-wrap">
+            <span class="material-symbols-outlined">warning</span>
+          </div>
+          <div class="conflict-content">
+            <h3 class="conflict-title">Live Conflict Alert</h3>
+            <p class="conflict-text">${payload.message}</p>
+          </div>
+        </div>
+      `;
+      warningBox.className = 'conflict-warning-card active';
     } else {
       warningBox.innerHTML = '';
       warningBox.className = 'form-help';

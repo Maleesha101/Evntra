@@ -8,10 +8,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     height: 'auto',
+    allDaySlot: false,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,timeGridWeek,listWeek',
+      right: 'dayGridMonth,timeGridWeek',
     },
     events,
     eventClick(info) {
@@ -23,4 +24,12 @@ window.addEventListener('DOMContentLoaded', async () => {
   });
 
   calendar.render();
+  window.appCalendar = calendar;
+
+  if (window.ResizeObserver) {
+    const resizeObserver = new ResizeObserver(() => {
+      calendar.updateSize();
+    });
+    resizeObserver.observe(calendarEl);
+  }
 });

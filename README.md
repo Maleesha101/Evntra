@@ -7,14 +7,25 @@ The application is built with PHP 8.1+, MySQL 8.0+, vanilla JavaScript, and cust
 ## Features
 
 - Public landing page with featured competitions
-- Student registration, login, password reset, dashboards, bookmarks, and competition browsing
+- Student registration, login, password reset, bookmarks, competition browsing, and refactored dashboards showing active vs previous registered events
 - Organizer competition creation, edit flow, registration management, analytics, and conflict warnings
 - Admin competition approval, user management, and conflict reporting
 - JSON APIs for browse search, bookmarks, registrations, notifications, calendars, and conflict checks
 - CSRF protection, prepared statements, password hashing, and login rate limiting
 - Banner uploads with MIME and size validation
-- Notification bell with unread count and recent notifications dropdown
+- Notification bell with unread status dot (vanishes on mark-all-read) and recent notifications dropdown
 - Responsive layout with sidebar navigation and mobile bottom navigation
+
+## Recent Enhancements & Refactoring
+
+1. **Clean Notification Dot**: Replaced the unread count with a subtle, modern notification dot. Tapping "Mark all read" immediately hides the dot via AJAX.
+2. **Refactored Student Dashboard Layout**:
+   - Split registered events into two side-by-side panels: **Registered competitions** (active/upcoming) and **Previous registered events** (past).
+   - Removed the generic "Recent competitions" panel to focus the dashboard on user-specific content.
+   - Styled past events with a greyed-out opacity level (`0.8`) to distinguish them from active/future competitions.
+   - Made the entire event card clickable to improve navigation ergonomics.
+   - Removed the "Competitions this month" KPI card to clean up the top stats bar.
+3. **Registration State Guard**: The registration button on the competition details page is disabled and styled as "Already Registered" if the student has already registered for the event.
 
 ## Setup
 

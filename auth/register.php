@@ -7,6 +7,11 @@ require_guest();
 $pdo = require __DIR__ . '/../config/db.php';
 $pageTitle = 'Register | Evntra';
 
+$fullName = '';
+$email = '';
+$university = '';
+$role = 'student';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
@@ -46,48 +51,71 @@ include __DIR__ . '/../includes/header.php';
 ?>
 <section class="auth-layout">
     <div class="hero-panel">
-        <span class="badge" style="background:rgba(0,212,170,0.18);">Join the network</span>
-        <h1>Create your Evntra account.</h1>
-        <p>Students can browse and register. Organizers can create competitions and monitor activity.</p>
+
+        <span class="badge">Join the network</span>
+        <h1>Create your <span class="gradient-text">Evntra</span> account</h1>
+        <p>Students can browse and register for competitions. Organizers can create events and monitor participant activity in real-time.</p>
+
+        <div class="auth-features">
+            <div class="auth-feature">
+                <span class="auth-feature-icon material-symbols-outlined">explore</span>
+                <span class="auth-feature-label"><strong>Discover Events</strong> - browse hackathons, CTFs & more</span>
+            </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon material-symbols-outlined">group_add</span>
+                <span class="auth-feature-label"><strong>Build Teams</strong> - collaborate with university peers</span>
+            </div>
+            <div class="auth-feature">
+                <span class="auth-feature-icon material-symbols-outlined">leaderboard</span>
+                <span class="auth-feature-label"><strong>Track Progress</strong> - analytics & performance stats</span>
+            </div>
+        </div>
     </div>
     <div class="form-card">
-        <h2>Register</h2>
+        <h2>Get started</h2>
+        <p class="auth-subtitle">Fill in your details to create a free account.</p>
         <form method="post" class="multi-step">
             <?= csrf_field() ?>
             <div class="form-group">
                 <label for="full_name">Full name</label>
-                <input type="text" id="full_name" name="full_name" required>
+                <input type="text" id="full_name" name="full_name" required placeholder="Ex: John Doe" value="<?= htmlspecialchars($fullName) ?>">
             </div>
             <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <label for="email">Email address</label>
+                <input type="email" id="email" name="email" required placeholder="Ex: you@university.edu" value="<?= htmlspecialchars($email) ?>">
             </div>
             <div class="form-group">
                 <label for="university">University</label>
-                <input type="text" id="university" name="university" required>
+                <input type="text" id="university" name="university" required placeholder="Ex: University of Colombo" value="<?= htmlspecialchars($university) ?>">
             </div>
             <div class="form-group">
                 <label for="role">Role</label>
                 <select id="role" name="role" required>
-                    <option value="student">Student</option>
-                    <option value="organizer">Organizer</option>
+                    <option value="student" <?= $role === 'student' ? 'selected' : '' ?>>Student</option>
+                    <option value="organizer" <?= $role === 'organizer' ? 'selected' : '' ?>>Organizer</option>
                 </select>
             </div>
             <div class="grid grid-2">
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" minlength="8" required>
+                    <input type="password" id="password" name="password" minlength="8" required placeholder="••••••••">
                 </div>
                 <div class="form-group">
                     <label for="confirm_password">Confirm password</label>
-                    <input type="password" id="confirm_password" name="confirm_password" minlength="8" required>
+                    <input type="password" id="confirm_password" name="confirm_password" minlength="8" required placeholder="••••••••">
                 </div>
             </div>
-            <div class="form-actions">
+            <div class="form-actions" style="flex-direction:column; gap:0.75rem; margin-top:0.5rem;">
                 <button class="btn btn-primary" type="submit">Create account</button>
-                <a class="btn btn-outline" href="/auth/login.php">Back to login</a>
             </div>
         </form>
+        <div class="auth-divider">or</div>
+        <p class="small-text">Already have an account? <a href="/auth/login.php">Sign in</a></p>
+        <div class="auth-trust">
+            <span class="auth-trust-item"><span class="material-symbols-outlined">lock</span> Encrypted</span>
+            <span class="auth-trust-item"><span class="material-symbols-outlined">verified</span> Verified</span>
+            <span class="auth-trust-item"><span class="material-symbols-outlined">speed</span> Instant</span>
+        </div>
     </div>
 </section>
 <?php include __DIR__ . '/../includes/footer.php'; ?>

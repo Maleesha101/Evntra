@@ -24,10 +24,34 @@ include __DIR__ . '/../includes/header.php';
 </section>
 
 <section class="kpi-grid">
-    <div class="stat-card card"><p class="small-text">Total competitions</p><h3 class="stat-value"><?= $stats['total_competitions'] ?></h3></div>
-    <div class="stat-card card"><p class="small-text">Total registrations</p><h3 class="stat-value"><?= $stats['total_registrations'] ?></h3></div>
-    <div class="stat-card card"><p class="small-text">Upcoming events</p><h3 class="stat-value"><?= $stats['upcoming_events'] ?></h3></div>
-    <div class="stat-card card"><p class="small-text">Pending approval</p><h3 class="stat-value"><?= $stats['pending_approval'] ?></h3></div>
+    <div class="stat-card card">
+        <div class="stat-card-header">
+            <span class="small-text">Total competitions</span>
+            <div class="stat-icon"><span class="material-symbols-outlined">trophy</span></div>
+        </div>
+        <h3 class="stat-value"><?= $stats['total_competitions'] ?></h3>
+    </div>
+    <div class="stat-card card">
+        <div class="stat-card-header">
+            <span class="small-text">Total registrations</span>
+            <div class="stat-icon"><span class="material-symbols-outlined">person_add</span></div>
+        </div>
+        <h3 class="stat-value"><?= $stats['total_registrations'] ?></h3>
+    </div>
+    <div class="stat-card card">
+        <div class="stat-card-header">
+            <span class="small-text">Upcoming events</span>
+            <div class="stat-icon"><span class="material-symbols-outlined">event_available</span></div>
+        </div>
+        <h3 class="stat-value"><?= $stats['upcoming_events'] ?></h3>
+    </div>
+    <div class="stat-card card">
+        <div class="stat-card-header">
+            <span class="small-text">Pending approval</span>
+            <div class="stat-icon"><span class="material-symbols-outlined">hourglass_empty</span></div>
+        </div>
+        <h3 class="stat-value"><?= $stats['pending_approval'] ?></h3>
+    </div>
 </section>
 
 <section class="dashboard-grid" style="margin-top:1.5rem;">
@@ -62,15 +86,41 @@ include __DIR__ . '/../includes/header.php';
             type: 'bar',
             data: {
                 labels: organizerChartData.bar.labels,
-                datasets: [{ label: 'Registrations', data: organizerChartData.bar.values, backgroundColor: '#6c63ff' }],
+                datasets: [{
+                    label: 'Registrations',
+                    data: organizerChartData.bar.values,
+                    backgroundColor: 'rgba(84, 233, 138, 0.75)',
+                    borderColor: '#54e98a',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                }],
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e2024',
+                        titleColor: '#e2e2e8',
+                        bodyColor: '#e2e2e8',
+                        borderColor: 'rgba(84, 233, 138, 0.25)',
+                        borderWidth: 1,
+                        displayColors: false,
+                        padding: 10,
+                        bodyFont: { family: 'Hanken Grotesk' },
+                        titleFont: { family: 'Space Grotesk' }
+                    }
+                },
                 scales: {
-                    x: { ticks: { color: '#e8eaf0' } },
-                    y: { ticks: { color: '#e8eaf0' } },
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#bbcbbb', font: { family: 'Hanken Grotesk' } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#bbcbbb', font: { family: 'Hanken Grotesk', precision: 0 } }
+                    },
                 },
             },
         });

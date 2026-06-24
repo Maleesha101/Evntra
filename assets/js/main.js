@@ -18,17 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
   if (markAllRead) {
     markAllRead.addEventListener('click', async () => {
       const items = [...document.querySelectorAll('[data-notification-id]')];
-      await Promise.all(items.map((item) => {
-        const notificationId = item.getAttribute('data-notification-id');
-        if (!notificationId) return Promise.resolve();
-        return fetch('/api/notifications.php', {
+      try {
+        await fetch('/api/notifications.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'read', id: notificationId })
+          body: JSON.stringify({ action: 'read-all' })
         });
-      }));
+      } catch (err) {
+        console.error('Error marking all notifications as read:', err);
+      }
       const badge = document.querySelector('[data-notification-count]');
-      if (badge) badge.textContent = '0';
+      if (badge) {
+        badge.style.display = 'none';
+      }
       items.forEach((item) => item.classList.remove('unread'));
     });
   }

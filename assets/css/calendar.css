@@ -6,34 +6,97 @@
   min-height: 640px;
 }
 
+/* FullCalendar Dark Mode Theme Custom Properties */
 .fc {
   color: var(--text-primary);
+  --fc-page-bg-color: var(--bg-surface);
+  --fc-neutral-bg-color: rgba(255, 255, 255, 0.03);
+  --fc-border-color: var(--border);
+  --fc-text-color: var(--text-primary);
+  
+  --fc-button-bg-color: var(--bg-surface);
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--text-primary);
+  
+  --fc-button-active-bg-color: var(--accent-primary);
+  --fc-button-active-border-color: var(--accent-primary);
+  --fc-button-active-text-color: #0A0B0D;
+  
+  --fc-button-hover-bg-color: rgba(84, 233, 138, 0.08);
+  --fc-button-hover-border-color: var(--accent-primary);
+  --fc-button-hover-text-color: var(--accent-primary);
 }
 
-.fc .fc-toolbar-title,
-.fc .fc-col-header-cell-cushion,
+/* Day header styling (Sun, Mon, Tue...) */
+.fc .fc-col-header-cell {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid var(--border) !important;
+  padding: 0.75rem 0 !important;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: var(--text-secondary) !important;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+/* Calendar Grid Cell Styling */
+.fc .fc-daygrid-day {
+  background-color: transparent !important;
+}
+
 .fc .fc-daygrid-day-number {
-  color: var(--text-primary);
+  color: var(--text-primary) !important;
+  padding: 8px !important;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-block;
+  transition: var(--transition);
 }
 
+.fc .fc-daygrid-day:hover .fc-daygrid-day-number {
+  color: var(--accent-primary) !important;
+}
+
+/* Event list, month, week buttons */
 .fc .fc-button {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  box-shadow: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  transition: var(--transition);
 }
 
-.fc .fc-button:hover,
-.fc .fc-button:focus,
-.fc .fc-button.fc-button-active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
+.fc .fc-button:focus {
+  box-shadow: none !important;
 }
 
-.fc .fc-daygrid-event,
-.fc .fc-timegrid-event {
-  border: none;
-  border-radius: 10px;
-  padding: 0.25rem 0.4rem;
-  font-weight: 700;
+/* Grid Border overrides */
+.fc-theme-standard td, 
+.fc-theme-standard th {
+  border: 1px solid var(--border) !important;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+  border: 1px solid var(--border) !important;
+}
+
+/* Event overrides */
+.fc .fc-daygrid-event {
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 0.35rem 0.5rem !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  transition: var(--transition);
+}
+
+.fc .fc-daygrid-event:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }

@@ -205,11 +205,11 @@ function category_colors(): array
     return [
         'CTF' => '#ff4757',
         'Hackathon' => '#6c63ff',
-        'Robotics' => '#00d4aa',
-        'Gaming' => '#ffa502',
-        'Coding' => '#2ed573',
+        'Robotics' => '#54e98a',
+        'Gaming' => '#ff9a4a',
+        'Coding' => '#61de8a',
         'AI/ML' => '#ff6b81',
-        'Other' => '#a4b0be',
+        'Other' => '#869486',
     ];
 }
 
@@ -217,6 +217,20 @@ function category_badge_style(string $category): string
 {
     $color = category_colors()[$category] ?? category_colors()['Other'];
     return 'style="background:' . e($color) . ';color:#fff;"';
+}
+
+function category_fallback_image(string $category): string
+{
+    $images = [
+        'CTF' => 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=600',
+        'Hackathon' => 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=600',
+        'Robotics' => 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=600',
+        'Gaming' => 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&q=80&w=600',
+        'Coding' => 'https://images.unsplash.com/photo-1605379399642-870262d3d051?auto=format&fit=crop&q=80&w=600',
+        'AI/ML' => 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&q=80&w=600',
+        'Other' => 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600',
+    ];
+    return $images[$category] ?? $images['Other'];
 }
 
 function adjacent_categories(): array

@@ -41,16 +41,25 @@ include __DIR__ . '/../includes/header.php';
 </section>
 
 <section class="filter-layout">
-    <aside class="filter-sidebar panel">
+    <aside class="filter-sidebar panel" style="display:flex; flex-direction:column; gap:1.25rem;">
+        <div style="display:flex; align-items:center; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem; margin-bottom:0.25rem;">
+            <span class="material-symbols-outlined text-primary" style="color:var(--accent-primary);">tune</span>
+            <h2 style="font-size:1.25rem; font-weight:700; margin:0; font-family:'Space Grotesk',sans-serif;">Refine Search</h2>
+        </div>
         <div class="form-group">
             <label for="search">Search</label>
-            <input id="search" type="search" placeholder="Search competitions" data-search-input>
+            <input id="search" type="search" placeholder="Search events, tags..." data-search-input>
         </div>
         <div class="form-group">
             <label>Category</label>
-            <?php foreach (array_keys(category_colors()) as $category): ?>
-                <label class="small-text"><input type="checkbox" value="<?= e($category) ?>" data-category-filter> <?= e($category) ?></label>
-            <?php endforeach; ?>
+            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:0.25rem;">
+                <?php foreach (array_keys(category_colors()) as $category): ?>
+                    <label class="small-text" style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" value="<?= e($category) ?>" data-category-filter style="width:1.15rem; height:1.15rem; border-radius:4px; cursor:pointer; margin:0;"> 
+                        <?= e($category) ?>
+                    </label>
+                <?php endforeach; ?>
+            </div>
         </div>
         <div class="form-group">
             <label for="sort">Sort by</label>
@@ -78,43 +87,25 @@ include __DIR__ . '/../includes/header.php';
                 <option value="offline">Offline</option>
             </select>
         </div>
-        <div class="grid grid-2">
-            <div class="form-group">
-                <label for="date_from">From</label>
-                <input type="date" id="date_from" data-date-from>
-            </div>
-            <div class="form-group">
-                <label for="date_to">To</label>
-                <input type="date" id="date_to" data-date-to>
-            </div>
+        <div class="form-group">
+            <label for="date_from">From Date</label>
+            <input type="date" id="date_from" data-date-from>
         </div>
+        <div class="form-group">
+            <label for="date_to">To Date</label>
+            <input type="date" id="date_to" data-date-to>
+        </div>
+        <button class="btn btn-outline" type="button" data-reset-filters style="width:100%; justify-content:center; margin-top:0.5rem;">Reset Filters</button>
     </aside>
 
-    <div>
+    <div style="flex:1;">
+        <!-- Active Filter Chips -->
+        <div style="display:none; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem; align-items:center;" data-active-chips></div>
+        
         <div data-view-panel="grid">
             <div class="grid grid-3" data-competition-grid>
                 <?php foreach ($initial['items'] as $competition): ?>
-                    <article class="card competition-card">
-                        <a href="<?= e($competition['url']) ?>" class="card-media">
-                            <img src="<?= e($competition['banner_image'] ?: '/assets/img/logo.svg') ?>" alt="<?= e($competition['title']) ?>">
-                        </a>
-                        <div class="card-body">
-                            <div class="card-meta" style="justify-content:space-between;align-items:center;">
-                                <span class="badge" style="background:<?= e($competition['category_color']) ?>;"><?= e($competition['category']) ?></span>
-                                <span class="badge" style="background:rgba(255,255,255,0.08);"><?= e($competition['registration_status']) ?></span>
-                            </div>
-                            <h3 class="card-title"><a href="<?= e($competition['url']) ?>"><?= e($competition['title']) ?></a></h3>
-                            <p><?= e(substr($competition['description'], 0, 120)) ?><?= strlen($competition['description']) > 120 ? '...' : '' ?></p>
-                            <div class="card-meta">
-                                <span><?= e(date('M d', strtotime($competition['event_start']))) ?></span>
-                                <span><?= e($competition['venue']) ?></span>
-                            </div>
-                            <div class="form-actions" style="margin-top:1rem;">
-                                <button class="btn btn-outline" type="button" data-bookmark-toggle data-competition-id="<?= (int) $competition['id'] ?>"><?= $competition['is_bookmarked'] ? 'Bookmarked' : 'Bookmark' ?></button>
-                                <a class="btn btn-primary" href="<?= e($competition['url']) ?>">View Details</a>
-                            </div>
-                        </div>
-                    </article>
+                    <!-- Items rendered dynamically via JS -->
                 <?php endforeach; ?>
             </div>
             <div class="form-actions" style="justify-content:center;margin-top:1.25rem;" data-pagination></div>
