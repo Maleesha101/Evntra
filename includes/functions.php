@@ -428,13 +428,35 @@ function handle_banner_upload(array $file): ?string
         throw new RuntimeException('Banner must be smaller than 2MB.');
     }
 
-    $allowedMimeTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mimeType = mime_content_type($file['tmp_name']) ?: '';
-    if (!array_key_exists($mimeType, $allowedMimeTypes)) {
+    // Validate image by file signature (magic bytes)
+    $handle = fopen($file['tmp_name'], 'rb');
+    $header = fread($handle, 12);
+    fclose($handle);
+    
+    $validImage = false;
+    $ext = '';
+    
+    // Check PNG signature: 89 50 4E 47
+    if (substr($header, 0, 4) === "\x89PNG") {
+        $validImage = true;
+        $ext = 'png';
+    }
+    // Check JPEG signature: FF D8 FF
+    elseif (substr($header, 0, 3) === "\xFF\xD8\xFF") {
+        $validImage = true;
+        $ext = 'jpg';
+    }
+    // Check WebP signature: RIFF ... WEBP
+    elseif (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") {
+        $validImage = true;
+        $ext = 'webp';
+    }
+    
+    if (!$validImage) {
         throw new RuntimeException('Only JPG, PNG, or WEBP files are allowed.');
     }
 
-    $filename = bin2hex(random_bytes(16)) . '.' . $allowedMimeTypes[$mimeType];
+    $filename = bin2hex(random_bytes(16)) . '.' . $ext;
     $targetDir = app_root_path('uploads/banners');
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0775, true);
