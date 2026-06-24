@@ -1,38 +1,48 @@
 # Evntra
 
-Evntra is a centralized university competition management platform for students, organizers, and administrators. It brings together competition discovery, registration, approvals, conflict detection, notifications, analytics, and calendar scheduling in one place so that universities can manage events without spreadsheets or fragmented communication.
+Evntra is a university competition management platform for students, organizers, and administrators. It brings together competition discovery, registration, approvals, conflict detection, notifications, analytics, and calendar scheduling in one place.
 
-The application is built with PHP 8.1+, MySQL 8.0+, vanilla JavaScript, and custom CSS. It includes a role-based auth system, a public landing page, searchable competition listings, organizer workflows for creating and editing events, admin moderation, Chart.js analytics, FullCalendar.js scheduling, PHPMailer-powered messaging, and a responsive dark-accented interface designed for desktop and mobile.
+Built with **PHP 8.1+**, **MySQL 8.0+**, **vanilla JavaScript**, and **custom CSS**.
+
+---
 
 ## Features
 
 - Public landing page with featured competitions
-- Student registration, login, password reset, bookmarks, competition browsing, and refactored dashboards showing active vs previous registered events
-- Organizer competition creation, edit flow, registration management, analytics, and conflict warnings
+- Student registration, login, password reset, bookmarks, and competition browsing
+- Student dashboard showing active and previous registered events
+- Organizer competition creation, editing, registration management, and analytics
 - Admin competition approval, user management, and conflict reporting
-- JSON APIs for browse search, bookmarks, registrations, notifications, calendars, and conflict checks
+- Calendar view using FullCalendar.js with multi-day event support
+- JSON APIs for search, bookmarks, registrations, notifications, and conflict checks
 - CSRF protection, prepared statements, password hashing, and login rate limiting
-- Banner uploads with MIME and size validation
-- Notification bell with unread status dot (vanishes on mark-all-read) and recent notifications dropdown
+- Banner uploads with file type and size validation
+- Notification bell with unread dot (clears on mark-all-read via AJAX)
 - Responsive layout with sidebar navigation and mobile bottom navigation
 
-## Recent Enhancements & Refactoring
-
-1. **Clean Notification Dot**: Replaced the unread count with a subtle, modern notification dot. Tapping "Mark all read" immediately hides the dot via AJAX.
-2. **Refactored Student Dashboard Layout**:
-   - Split registered events into two side-by-side panels: **Registered competitions** (active/upcoming) and **Previous registered events** (past).
-   - Removed the generic "Recent competitions" panel to focus the dashboard on user-specific content.
-   - Styled past events with a greyed-out opacity level (`0.8`) to distinguish them from active/future competitions.
-   - Made the entire event card clickable to improve navigation ergonomics.
-   - Removed the "Competitions this month" KPI card to clean up the top stats bar.
-3. **Registration State Guard**: The registration button on the competition details page is disabled and styled as "Already Registered" if the student has already registered for the event.
+---
 
 ## Setup
 
-1. Clone or open the project folder.
-2. Import the database schema from `sql/schema.sql` into MySQL 8.0+.
-3. Create a MySQL database named `unicompete_hub` or update the credentials in `.env`.
-4. Configure environment variables or a local `.env` file:
+### 1. Clone the project
+
+```bash
+git clone https://github.com/Maleesha101/Evntra.git
+cd Evntra
+```
+
+### 2. Create the database
+
+Using XAMPP MySQL (or any MySQL 8.0+ client):
+
+```bash
+mysql -u root -e "CREATE DATABASE evntra CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql -u root evntra < sql/schema.sql
+```
+
+### 3. Configure environment (optional)
+
+Create a `.env` file in the project root to override defaults:
 
 ```env
 DB_HOST=127.0.0.1
@@ -40,56 +50,88 @@ DB_PORT=3306
 DB_NAME=evntra
 DB_USER=root
 DB_PASS=
-APP_URL=http://localhost/evntra
-SMTP_HOST=smtp.example.com
-SMTP_PORT=587
-SMTP_USER=your-smtp-user
-SMTP_PASS=your-smtp-password
-SMTP_ENCRYPTION=tls
-MAIL_FROM=no-reply@evntra.test
-MAIL_FROM_NAME=Evntra
+APP_URL=http://localhost:8000
 ```
 
-5. Install the PHP dependency for email support:
+> Without a `.env` file the app uses the defaults above — it will work out of the box with XAMPP.
+
+### 4. Email support (optional)
+
+Email (password reset, registration confirmations) uses **PHPMailer** if installed, otherwise falls back to PHP's built-in `mail()`. To install PHPMailer:
 
 ```bash
 composer install
 ```
 
-6. Make sure `uploads/banners/` is writable by the web server.
-7. Start PHP through your preferred local web server and browse to `/index.php`.
+If you skip this step the app still works — emails just use the system `mail()` function.
+
+### 5. Make uploads writable
+
+```bash
+mkdir -p uploads/banners
+```
+
+### 6. Start the server
+
+```bash
+php -S localhost:8000
+```
+
+Then open [http://localhost:8000](http://localhost:8000) in your browser.
+
+---
 
 ## Default Logins
 
-Seed data is included in the schema for quick testing:
+Seed data is included in `sql/schema.sql` for quick testing:
 
-- Student: `student@evntra.test` / `Student123!`
-- Organizer: `organizer@evntra.test` / `Organizer123!`
-- Admin: `admin@evntra.test` / `Admin123!`
+| Role | Email | Password |
+|---|---|---|
+| Student | `student@evntra.test` | `Student123!` |
+| Organizer | `organizer@evntra.test` | `Organizer123!` |
+| Admin | `admin@evntra.test` | `Admin123!` |
+
+---
 
 ## Folder Structure
 
-- `index.php` - public landing page
-- `config/db.php` - PDO bootstrap
-- `auth/` - login, registration, logout, and password reset flows
-- `student/` - browsing, competition detail, registrations, and bookmarks
-- `organizer/` - dashboards, competition creation/editing, analytics, and registration management
-- `admin/` - approvals, user management, and conflict reporting
-- `api/` - JSON endpoints for front-end interactivity and form submission
-- `includes/` - shared layout, auth guard, helper functions, and mail wrapper
-- `assets/css/` - custom styling for the public UI and dashboards
-- `assets/js/` - live search, calendar, analytics, conflict checks, and shared UI behavior
-- `uploads/banners/` - competition banner uploads
-- `sql/schema.sql` - schema and demo seed data
+```
+Evntra/
+├── index.php              # Public landing page
+├── config/
+│   └── db.php             # PDO database connection
+├── auth/                  # Login, register, logout, password reset
+├── student/               # Browse, competition detail, dashboard, bookmarks
+├── organizer/             # Dashboard, create/edit competitions, analytics
+├── admin/                 # Approvals, user management, conflict report
+├── api/                   # JSON endpoints (search, bookmarks, register, etc.)
+├── includes/              # Shared functions, header, footer, navbar, mailer
+├── assets/
+│   ├── css/               # main.css, dashboard.css, calendar.css
+│   ├── js/                # calendar.js, search-filter.js, analytics.js, etc.
+│   └── img/               # logo.svg
+├── uploads/
+│   └── banners/           # Uploaded competition banner images
+└── sql/
+    └── schema.sql         # Database schema + seed data
+```
 
-## Screenshots
+---
 
-Placeholder for production screenshots of:
+## Tech Stack
 
-- Public landing page
-- Student browse and calendar view
-- Organizer dashboard and analytics
-- Admin approval and conflict report pages
+| Layer | Technology |
+|---|---|
+| Backend | PHP 8.1+ |
+| Database | MySQL 8.0+ via PDO |
+| Frontend | Vanilla HTML / CSS / JavaScript |
+| Calendar | FullCalendar.js 6.x |
+| Charts | Chart.js |
+| Email | PHPMailer 6.x (optional) |
+| Icons | Google Material Symbols |
+| Fonts | Google Fonts (Space Grotesk, Inter) |
+
+---
 
 ## License
 
