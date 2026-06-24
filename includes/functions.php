@@ -51,9 +51,9 @@ function app_config(): array
     return [
         'db_host' => app_env('DB_HOST', '127.0.0.1'),
         'db_port' => app_env('DB_PORT', '3306'),
-        'db_name' => app_env('DB_NAME', 'unicompete_hub'),
+        'db_name' => app_env('DB_NAME', 'envtra'),
         'db_user' => app_env('DB_USER', 'root'),
-        'db_pass' => app_env('DB_PASS', null),
+        'db_pass' => app_env('DB_PASS', ''),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
         'smtp_host' => app_env('SMTP_HOST', ''),
         'smtp_port' => (int) app_env('SMTP_PORT', 587),
@@ -401,7 +401,7 @@ function competition_within_days(DateTimeImmutable $first, DateTimeImmutable $se
 
 function run_conflict_scan(PDO $pdo): array
 {
-    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC')->fetchAll();
+    $competitions = $pdo->query('SELECT * FROM competitions WHERE status IN ("pending", "published", "ongoing") ORDER BY event_start ASC')->fetchAll();
     $pdo->exec('DELETE FROM conflict_flags');
     $insert = $pdo->prepare('INSERT INTO conflict_flags (competition_a_id, competition_b_id, severity) VALUES (?, ?, ?)');
     $results = [];
@@ -438,13 +438,35 @@ function handle_banner_upload(array $file): ?string
         throw new RuntimeException('Banner must be smaller than 2MB.');
     }
 
-    $allowedMimeTypes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mimeType = mime_content_type($file['tmp_name']) ?: '';
-    if (!array_key_exists($mimeType, $allowedMimeTypes)) {
+    // Validate image by file signature (magic bytes)
+    $handle = fopen($file['tmp_name'], 'rb');
+    $header = fread($handle, 12);
+    fclose($handle);
+    
+    $validImage = false;
+    $ext = '';
+    
+    // Check PNG signature: 89 50 4E 47
+    if (substr($header, 0, 4) === "\x89PNG") {
+        $validImage = true;
+        $ext = 'png';
+    }
+    // Check JPEG signature: FF D8 FF
+    elseif (substr($header, 0, 3) === "\xFF\xD8\xFF") {
+        $validImage = true;
+        $ext = 'jpg';
+    }
+    // Check WebP signature: RIFF ... WEBP
+    elseif (substr($header, 0, 4) === "RIFF" && substr($header, 8, 4) === "WEBP") {
+        $validImage = true;
+        $ext = 'webp';
+    }
+    
+    if (!$validImage) {
         throw new RuntimeException('Only JPG, PNG, or WEBP files are allowed.');
     }
 
-    $filename = bin2hex(random_bytes(16)) . '.' . $allowedMimeTypes[$mimeType];
+    $filename = bin2hex(random_bytes(16)) . '.' . $ext;
     $targetDir = app_root_path('uploads/banners');
     if (!is_dir($targetDir)) {
         mkdir($targetDir, 0775, true);
@@ -788,20 +810,46 @@ function competition_search_query(array $filters): array
 
 function competition_calendar_events(PDO $pdo): array
 {
-    $stmt = $pdo->query('SELECT id, title, category, event_start, event_end, slug FROM competitions WHERE status IN ("published", "ongoing") ORDER BY event_start ASC');
-    $events = [];
-    foreach ($stmt->fetchAll() as $row) {
-        $events[] = [
-            'id' => (int) $row['id'],
-            'title' => $row['title'],
-            'start' => $row['event_start'],
-            'end' => $row['event_end'],
-            'url' => competition_url($row),
-            'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
-            'extendedProps' => ['category' => $row['category']],
-        ];
+    try {
+        // Detailed query with logging
+        $query = '
+            SELECT id, title, category, event_start, event_end, slug, status
+            FROM competitions 
+            WHERE status IN ("published", "ongoing")
+            AND event_start IS NOT NULL 
+            AND event_end IS NOT NULL
+            AND event_start <= event_end
+            ORDER BY event_start ASC
+        ';
+        
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+        
+        // Log the raw results
+        error_log('Calendar Query Results: Found ' . count($rows) . ' competitions');
+        
+        $events = [];
+        foreach ($rows as $row) {
+            $event = [
+                'id' => (int) $row['id'],
+                'title' => $row['title'],
+                'start' => $row['event_start'],
+                'end' => $row['event_end'],
+                'url' => competition_url($row),
+                'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
+                'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
+            ];
+            $events[] = $event;
+            error_log('Calendar Event: ' . $row['title'] . ' (' . $row['status'] . ') - ' . $row['event_start']);
+        }
+        
+        error_log('Calendar Events Total: ' . count($events));
+        return $events;
+    } catch (Throwable $e) {
+        error_log('Calendar events error: ' . $e->getMessage());
+        return [];
     }
-    return $events;
 }
 
 function competition_registrations_for_organizer(PDO $pdo, int $organizerId): array
@@ -1084,7 +1132,20 @@ function save_competition_from_input(PDO $pdo, int $organizerId, array $input, a
     $category = (string) ($input['category'] ?? 'Other');
     $description = trim((string) ($input['description'] ?? ''));
     $eligibility = trim((string) ($input['eligibility'] ?? ''));
-    $prizePool = trim((string) ($input['prize_pool'] ?? ''));
+    $firstPlacePrize = trim((string) ($input['first_place_prize'] ?? ''));
+    $secondPlacePrize = trim((string) ($input['second_place_prize'] ?? ''));
+    $thirdPlacePrize = trim((string) ($input['third_place_prize'] ?? ''));
+    // Combine prizes into prize_pool for database storage
+    $prizePool = '';
+    if ($firstPlacePrize !== '') {
+        $prizePool .= '1st: ' . $firstPlacePrize;
+    }
+    if ($secondPlacePrize !== '') {
+        $prizePool .= ($prizePool !== '' ? ' | ' : '') . '2nd: ' . $secondPlacePrize;
+    }
+    if ($thirdPlacePrize !== '') {
+        $prizePool .= ($prizePool !== '' ? ' | ' : '') . '3rd: ' . $thirdPlacePrize;
+    }
     $registrationStart = trim((string) ($input['registration_start'] ?? ''));
     $registrationEnd = trim((string) ($input['registration_end'] ?? ''));
     $eventStart = trim((string) ($input['event_start'] ?? ''));
@@ -1139,4 +1200,28 @@ function save_competition_from_input(PDO $pdo, int $organizerId, array $input, a
         'competition_id' => $competitionId,
         'slug' => $slug,
     ];
+}
+
+function parse_prize_pool(string $prizePool): array
+{
+    $prizes = ['first' => null, 'second' => null, 'third' => null];
+    
+    if (empty($prizePool)) {
+        return $prizes;
+    }
+    
+    // Split by pipe separator
+    $parts = array_map('trim', explode('|', $prizePool));
+    
+    foreach ($parts as $part) {
+        if (str_starts_with($part, '1st:')) {
+            $prizes['first'] = trim(substr($part, 4));
+        } elseif (str_starts_with($part, '2nd:')) {
+            $prizes['second'] = trim(substr($part, 4));
+        } elseif (str_starts_with($part, '3rd:')) {
+            $prizes['third'] = trim(substr($part, 4));
+        }
+    }
+    
+    return $prizes;
 }
