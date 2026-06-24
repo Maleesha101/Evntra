@@ -85,4 +85,46 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('[data-auto-submit]').forEach((field) => {
     field.addEventListener('change', () => field.form?.requestSubmit());
   });
+
+  // Logout confirmation modal
+  const logoutModal = document.getElementById('logoutModal');
+  const logoutConfirmBtn = document.getElementById('logoutConfirm');
+  const logoutCancelBtn = document.getElementById('logoutCancel');
+  let logoutUrl = null;
+
+  // Intercept all logout links
+  document.querySelectorAll('a[href="/auth/logout.php"]').forEach((logoutLink) => {
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      logoutUrl = logoutLink.href;
+      logoutModal.classList.add('active');
+    });
+  });
+
+  // Cancel logout
+  if (logoutCancelBtn) {
+    logoutCancelBtn.addEventListener('click', () => {
+      logoutModal.classList.remove('active');
+      logoutUrl = null;
+    });
+  }
+
+  // Confirm logout
+  if (logoutConfirmBtn) {
+    logoutConfirmBtn.addEventListener('click', () => {
+      if (logoutUrl) {
+        window.location.href = logoutUrl;
+      }
+    });
+  }
+
+  // Close modal when clicking outside
+  if (logoutModal) {
+    logoutModal.addEventListener('click', (e) => {
+      if (e.target === logoutModal) {
+        logoutModal.classList.remove('active');
+        logoutUrl = null;
+      }
+    });
+  }
 });
