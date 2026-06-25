@@ -51,7 +51,7 @@ function app_config(): array
     return [
         'db_host' => app_env('DB_HOST', '127.0.0.1'),
         'db_port' => app_env('DB_PORT', '3306'),
-        'db_name' => app_env('DB_NAME', 'envtra'),
+        'db_name' => app_env('DB_NAME', 'evntra'),
         'db_user' => app_env('DB_USER', 'root'),
         'db_pass' => app_env('DB_PASS', ''),
         'app_url' => rtrim((string) app_env('APP_URL', 'http://localhost/evntra'), '/'),
@@ -821,40 +821,59 @@ function competition_search_query(array $filters): array
 function competition_calendar_events(PDO $pdo): array
 {
     try {
-        // Detailed query with logging
         $query = '
             SELECT id, title, category, event_start, event_end, slug, status
-            FROM competitions 
+            FROM competitions
             WHERE status IN ("published", "ongoing")
-            AND event_start IS NOT NULL 
+            AND event_start IS NOT NULL
             AND event_end IS NOT NULL
             AND event_start <= event_end
             ORDER BY event_start ASC
         ';
-        
+
         $stmt = $pdo->prepare($query);
         $stmt->execute();
         $rows = $stmt->fetchAll();
-        
-        // Log the raw results
-        error_log('Calendar Query Results: Found ' . count($rows) . ' competitions');
-        
+
         $events = [];
         foreach ($rows as $row) {
-            $event = [
-                'id' => (int) $row['id'],
-                'title' => $row['title'],
-                'start' => $row['event_start'],
-                'end' => $row['event_end'],
-                'url' => competition_url($row),
-                'color' => category_colors()[$row['category']] ?? category_colors()['Other'],
-                'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
-            ];
-            $events[] = $event;
-            error_log('Calendar Event: ' . $row['title'] . ' (' . $row['status'] . ') - ' . $row['event_start']);
+            $start = new DateTimeImmutable($row['event_start']);
+            $end   = new DateTimeImmutable($row['event_end']);
+
+            // Determine if this is a multi-day or single-day event
+            $startDay = $start->format('Y-m-d');
+            $endDay   = $end->format('Y-m-d');
+            $isMultiDay = $startDay !== $endDay;
+
+            if ($isMultiDay) {
+                // FullCalendar end is EXCLUSIVE — add 1 day so the event
+                // visually fills through the actual last day on the month grid
+                $exclusiveEnd = $end->modify('+1 day')->format('Y-m-d');
+                $events[] = [
+                    'id'            => (int) $row['id'],
+                    'title'         => $row['title'],
+                    'start'         => $startDay,
+                    'end'           => $exclusiveEnd,
+                    'allDay'        => true,
+                    'url'           => competition_url($row),
+                    'color'         => category_colors()[$row['category']] ?? category_colors()['Other'],
+                    'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
+                ];
+            } else {
+                // Single-day: keep the full datetime so time shows in week view
+                $events[] = [
+                    'id'            => (int) $row['id'],
+                    'title'         => $row['title'],
+                    'start'         => $row['event_start'],
+                    'end'           => $row['event_end'],
+                    'allDay'        => false,
+                    'url'           => competition_url($row),
+                    'color'         => category_colors()[$row['category']] ?? category_colors()['Other'],
+                    'extendedProps' => ['category' => $row['category'], 'status' => $row['status']],
+                ];
+            }
         }
-        
-        error_log('Calendar Events Total: ' . count($events));
+
         return $events;
     } catch (Throwable $e) {
         error_log('Calendar events error: ' . $e->getMessage());
